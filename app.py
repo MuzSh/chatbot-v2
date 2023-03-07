@@ -2,6 +2,9 @@ from flask import Flask, request, render_template
 import requests
 import os 
 from dotenv import load_dotenv
+import re
+
+yearList = [] 
 
 def configure():
     load_dotenv()
@@ -24,6 +27,14 @@ def get_bot_response():
         api_key = os.getenv('api_key')
         model = "text-curie-001"
         response = generate_response_gpt3(user_message, model, api_key)
+        # for i in range(25):
+            # response = generate_response_gpt3(user_message, model, api_key)
+            # print(response)
+            # try:
+            #     val = [int(year_regex.search(string).group(response)) for string in yearList ]
+            #     yearList.append(val)
+            # except:
+            #     pass
     return response
 
 def generate_response_gpt3(user_message, model, api_key):
@@ -42,6 +53,7 @@ def generate_response_gpt3(user_message, model, api_key):
     # print(response['choices'][0]['text'].strip())
 
     # some error handling 
+
     if 'error' in response:
         keyWords = ['exceeded', 'quota']
         result = response["error"]["message"]
@@ -53,3 +65,6 @@ def generate_response_gpt3(user_message, model, api_key):
 
 if __name__ == "__main__":
     app.run()
+    # year_regex = re.compile(r'\d{4}')  # Regular expression to match four consecutive digits
+    # years = [int(year_regex.search(string).group()) for string in yearList]
+    # print(years)
