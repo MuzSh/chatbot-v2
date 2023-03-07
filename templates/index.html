@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat Bot</title>
+    <style>
+        #chat-container {
+            width: 500px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        #chat-history {
+            height: 300px;
+            overflow-y: scroll;
+            padding-right: 15px;
+        }
+
+        .chat-message {
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 18px;
+            max-width: 80%;
+            transition: opacity 0.2s ease-out;
+        }
+
+        .user-message {
+            text-align: right;
+            margin-left: auto;
+            background-color: #a6d8f1;
+            color: #fff;
+        }
+
+        .chatbot-message {
+            text-align: left;
+            margin-right: auto;
+            background-color: #c4ffb3;
+        }
+
+        #text-input {
+            width: 60%;
+            height: 30px;
+            font-size: 20px;
+            margin-top: 20px;
+        }
+
+        /* #chatbox {
+            background-color: aqua;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+            margin-bottom: 20px;
+        } */
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat-history"></div>
+        <input type="text" id="text-input" placeholder="write your question"></input>
+        <button id="submit-button">send</button>
+    </div>
+    <script>
+        const chatHistory = document.getElementById("chat-history");
+        const textInput = document.getElementById("text-input");
+        const submitButton = document.getElementById("submit-button");
+
+        submitButton.addEventListener("click", function () {
+            const userMessage = textInput.value;
+
+            const userMessageDiv = document.createElement("div");
+            userMessageDiv.classList.add("chat-message");
+            userMessageDiv.classList.add("user-message");
+            userMessageDiv.innerHTML = userMessage;
+            chatHistory.appendChild(userMessageDiv);
+            textInput.value = "";
+
+            fetch("/chat", {
+                method: "POST",
+                headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                body: `text=${userMessage}`
+            })
+            .then(response => response.text())
+            .then(response => {
+                const chatbotMessageDiv = document.createElement("div");
+                chatbotMessageDiv.classList.add("chat-message");
+                chatbotMessageDiv.classList.add("chatbot-message");
+                chatbotMessageDiv.innerHTML = response;
+                chatHistory.appendChild(chatbotMessageDiv);
+
+                // Fade in the chatbot message
+                chatbotMessageDiv.style.opacity = 0;
+                setTimeout(() => chatbotMessageDiv.style.opacity = 1, 10);
+                
+                // Scroll to the bottom of the chat history
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            });
+        });
+    </script>
+</body>
+</html>
