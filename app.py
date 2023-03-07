@@ -1,5 +1,8 @@
 from flask import Flask, request, jsonify, render_template
 import requests
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -11,7 +14,7 @@ def index():
 
 def get_bot_response():
     user_message = request.args.get("msg")
-    api_key = "api_key_here" 
+    api_key = os.getenv('API_KEY')
     model = "text-davinci-003"
     respone = generate_response_gpt3(user_message,model,api_key)
 
