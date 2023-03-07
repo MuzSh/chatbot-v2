@@ -1,33 +1,55 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, render_template
 import requests
+import os 
 from dotenv import load_dotenv
-import os
-load_dotenv()
 
+def configure():
+    load_dotenv()
+    
 app = Flask(__name__)
 
-@app.route("/") 
+@app.route("/")
 def index():
     return render_template("index.html")
 
-@app.route("/get") 
-
+@app.route("/get")
 def get_bot_response():
-    user_message = request.args.get("msg")
-    api_key = os.getenv('API_KEY')
-    model = "text-davinci-003"
-    respone = generate_response_gpt3(user_message,model,api_key)
+    configure()
+    user_message = request.args.get('msg')
+    if user_message in ['What is your name?', 'name?']:
+        response = "My name is ChatBot."
+    elif user_message in ['How old are you?', 'age?']:
+        response = "I don't have an age, I'm just a computer program."
+    else:
+        api_key = os.getenv('api_key')
+        model = "text-curie-001"
+        response = generate_response_gpt3(user_message, model, api_key)
+    return response
 
-def generate_response_gpt3(user_message,model,api_key):
-    prompt = (f"User: {user_message}\n"f"chatbot:")
-    response = requests.post("https:api.openai.com/v1/engines/text-davinci-003/completions",
-                             headers={"Authorization": f"Bearer {api_key}"},
-                             json= {
-                                "prompt": prompt,
-                                "max_tokens": 200,
-                                "temperature": 0.7,
-                             }).json()
-    return response["choices"][0]['text'].strip()[]
-#  run the app
+def generate_response_gpt3(user_message, model, api_key):
+    prompt = (f"User: {user_message}\n"
+              f"ChatBot:")
+    response = requests.post(
+        "https://api.openai.com/v1/engines/text-curie-001/completions",
+        headers={"Authorization": f"Bearer {api_key}"},
+        json={
+            "prompt": prompt,
+            "max_tokens": 100,
+            "temperature": 0.7,
+        },
+    ).json()
+
+    # print(response['choices'][0]['text'].strip())
+
+    # some error handling 
+    if 'error' in response:
+        keyWords = ['exceeded', 'quota']
+        result = response["error"]["message"]
+        if any(word in str(result) for word in keyWords):
+            return "No More. Please contact your administrator for more information!"
+        else:
+            return f"Sorry, there was an error processing your request. Please try again later."
+    return response['choices'][0]['text'].strip()
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
